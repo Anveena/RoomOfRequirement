@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"github.com/Anveena/RoomOfRequirement/ezConfig"
 	"github.com/Anveena/RoomOfRequirement/ezCrypto"
+	"github.com/Anveena/RoomOfRequirement/ezFile"
 	"github.com/Anveena/RoomOfRequirement/ezHash"
 	"github.com/Anveena/RoomOfRequirement/ezLog"
 	"github.com/Anveena/RoomOfRequirement/ezMySQL"
 	"github.com/Anveena/RoomOfRequirement/ezRandom"
 	"github.com/Anveena/RoomOfRequirement/ezXMLTreeMaker"
+	"os"
 	"time"
 )
 
@@ -31,6 +33,26 @@ func main() {
 	ezLog.F(ezRandom.RandomString(ezRandom.NumberAndCapitalLetter, 16), ezRandom.NumberAndCapitalLetter)
 	ezLog.SendMessageToDing(ezRandom.RandomString(ezRandom.NumberAndLowercaseLetter, 16), ezRandom.NumberAndLowercaseLetter)
 	ezLog.I(ezMySQL.MakePasswordBase64Str("jyydb_2015!"))
+	f, err := ezFile.CreateFile("/Users/panys/Desktop/", "wzz.txt", true, os.O_RDWR|os.O_CREATE|os.O_TRUNC)
+	if err != nil {
+		ezLog.F(err.Error())
+		return
+	}
+	_, err = f.Write([]byte("宇智波"))
+	if err != nil {
+		ezLog.F(err.Error())
+		return
+	}
+	f.Truncate(0)
+	_, err = f.Write([]byte("多由也duoyouye"))
+	if err != nil {
+		ezLog.F(err.Error())
+		return
+	}
+	if err = f.Close(); err != nil {
+		ezLog.F(err.Error())
+		return
+	}
 	orikey := "大番薯"
 	aesKey := ezCrypto.MakeMD5Key(orikey, time.Now().UnixNano()%251)
 	data := []byte("鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")

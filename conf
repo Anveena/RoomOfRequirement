@@ -1,6 +1,4 @@
 {
-        "which_level_log_should_write_at_db":0,
         "which_level_log_should_print":0,
-        "path_to_save_log":".",
-        "ding_ding_url":""
+        "ding_ding_url":"adf"
 }
