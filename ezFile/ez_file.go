@@ -3,6 +3,7 @@ package ezFile
 import (
 	"errors"
 	"os"
+	"path/filepath"
 )
 
 func IsDirExists(path string) bool {
@@ -25,16 +26,24 @@ func IsFileExists(path string) bool {
 	}
 	return !fileInfo.IsDir()
 }
-func CreateFile(path string, fileName string, overwrite bool, openFlag int) (*os.File, error) {
-	if !IsDirExists(path) {
-		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+func CreateFile(dir string, fileName string, overwrite bool, openFlag int) (*os.File, error) {
+	if !IsDirExists(dir) {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return nil, err
 		}
 	}
-	if IsFileExists(path + fileName) {
+	if IsFileExists(filepath.Join(dir, fileName)) {
 		if !overwrite {
 			return nil, errors.New("file already exist")
 		}
 	}
-	return os.OpenFile(path+fileName, openFlag, os.ModePerm)
+	return os.OpenFile(filepath.Join(dir, fileName), openFlag, os.ModePerm)
+}
+func CreateDir(path string) error {
+	if !IsDirExists(path) {
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -1,30 +1,19 @@
 package ezLog
 
-/*
-#if (defined _WIN32) || (defined __WINDOWS_)
-#include <windows.h>
-#endif
-void initPrint() {
-#if (defined _WIN32) || (defined __WINDOWS_)
-    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD mode;
-    GetConsoleMode(handle, &mode);
-    mode |= (DWORD)0x4;
-    SetConsoleMode(handle, mode);
-#endif
-}
-*/
-import "C"
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Anveena/RoomOfRequirement/ezFile"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -54,51 +43,136 @@ var lvMap = map[int]string{
 }
 var dingURL = ""
 var levelShouldPrintAtTerminal = LogLvInfo
+var logFile *os.File
+var logFileLock = &sync.Mutex{}
+var txtMsgQue = make(chan *string, 1024)
 
 type EZLoggerModel struct {
-	WhichLevelLogShouldPrint int    `json:"which_level_log_should_print"`
-	DingDingUrl              string `json:"ding_ding_url"`
+	LogLevel    int    `json:"log_level"`
+	LogFilePath string `json:"log_file_path"`
+	DingDingUrl string `json:"ding_ding_url"`
 }
 
 func SetUpEnv(m *EZLoggerModel) error {
-	C.initPrint()
 	dingURL = m.DingDingUrl
-	if m.WhichLevelLogShouldPrint <= LogLvMessageToDing && dingURL == "" {
-		return errors.New("log level include ding talk but ding url is empty")
+	if m.LogLevel <= LogLvMessageToDing && dingURL == "" {
+		return errors.New("ezlog level include ding talk but ding url is empty")
 	}
-	levelShouldPrintAtTerminal = m.WhichLevelLogShouldPrint
+	levelShouldPrintAtTerminal = m.LogLevel
+	if err := ezFile.CreateDir(m.LogFilePath); err != nil {
+		return err
+	}
+	go newLogFile(m.LogFilePath)
+	go startLogServer()
 	return nil
 }
 func T(msg ...interface{}) {
-	log(LogLvTrace, fmt.Sprintln(msg...))
+	ezlog(LogLvTrace, fmt.Sprint(msg...))
 }
 func I(msg ...interface{}) {
-	log(LogLvInfo, fmt.Sprintln(msg...))
+	ezlog(LogLvInfo, fmt.Sprint(msg...))
 }
 func W(msg ...interface{}) {
-	log(LogLvWarning, fmt.Sprintln(msg...))
+	ezlog(LogLvWarning, fmt.Sprint(msg...))
 }
 func E(msg ...interface{}) {
-	log(LogLvError, fmt.Sprintln(msg...))
+	ezlog(LogLvError, fmt.Sprint(msg...))
 }
 func F(msg ...interface{}) {
-	log(LogLvFatal, fmt.Sprintln(msg...))
+	ezlog(LogLvFatal, fmt.Sprint(msg...))
 }
 func SendMessageToDing(msg ...interface{}) {
-	go sendToDing(fmt.Sprintln(msg...))
-	log(LogLvMessageToDing, fmt.Sprintln(msg...))
+	go sendToDing(msgFmt(LogLvMessageToDing, fmt.Sprint(msg...)))
+	ezlog(LogLvMessageToDing, fmt.Sprint(msg...))
 }
-func log(level int, msg string) {
+
+func TWithTag(tag string, msg ...interface{}) {
+	ezlogWithTag(LogLvTrace, tag, fmt.Sprint(msg...))
+}
+func IWithTag(tag string, msg ...interface{}) {
+	ezlogWithTag(LogLvInfo, tag, fmt.Sprint(msg...))
+}
+func WWithTag(tag string, msg ...interface{}) {
+	ezlogWithTag(LogLvWarning, tag, fmt.Sprint(msg...))
+}
+func EWithTag(tag string, msg ...interface{}) {
+	ezlogWithTag(LogLvError, tag, fmt.Sprint(msg...))
+}
+func FWithTag(tag string, msg ...interface{}) {
+	ezlogWithTag(LogLvFatal, tag, fmt.Sprint(msg...))
+}
+func SendMessageToDingWithTag(tag string, msg ...interface{}) {
+	ezlogWithTag(LogLvMessageToDing, tag, fmt.Sprint(msg...))
+	go sendToDing(msgWithTagFmt(LogLvMessageToDing, fmt.Sprint(msg...), tag))
+}
+func ezlog(level int, msg string) {
 	if level >= levelShouldPrintAtTerminal {
-		_, file, line, _ := runtime.Caller(2)
-		strHeader := "\n" + lvMap[level] + " "
-		msg = msg[:len(msg)-1]
-		msgFormatted := strings.ReplaceAll(msg, "\n", strHeader)
-		finalStr := strHeader + "File:" + file +
-			strHeader + "Line:" + strconv.Itoa(line) +
-			strHeader + "Time:" + time.Now().String() +
-			strHeader + msgFormatted
-		mPrint(level, finalStr)
+		rs := msgFmt(level, msg)
+		txtMsgQue <- &rs
+	}
+}
+func ezlogWithTag(level int, msg string, tag string) {
+	if level >= levelShouldPrintAtTerminal {
+		rs := msgWithTagFmt(level, msg, tag)
+		txtMsgQue <- &rs
+	}
+}
+func msgWithTagFmt(level int, msg string, tag string) string {
+	_, file, line, _ := runtime.Caller(3)
+	strHeader := "\n" + lvMap[level] + "[" + tag + "] "
+	msgFormatted := strings.ReplaceAll(msg, "\n", strHeader)
+	return strHeader + "File:" + file +
+		strHeader + "Line:" + strconv.Itoa(line) +
+		strHeader + "Time:" + time.Now().Format("15:04:05.999999") +
+		strHeader + msgFormatted + "\n"
+}
+func msgFmt(level int, msg string) string {
+	_, file, line, _ := runtime.Caller(3)
+	strHeader := "\n" + lvMap[level] + " "
+	msgFormatted := strings.ReplaceAll(msg, "\n", strHeader)
+	return strHeader + "File:" + file +
+		strHeader + "Line:" + strconv.Itoa(line) +
+		strHeader + "Time:" + time.Now().Format("15:04:05.999999") +
+		strHeader + msgFormatted + "\n"
+}
+func startLogServer() {
+	runtime.LockOSThread()
+	for {
+		for i := 0; i < 100; i++ {
+			msg := <-txtMsgQue
+			logFileLock.Lock()
+			_, _ = logFile.WriteString(*msg)
+			logFileLock.Unlock()
+		}
+		logFileLock.Lock()
+		if err := logFile.Sync(); err != nil {
+			println(err.Error())
+		}
+		logFileLock.Unlock()
+	}
+}
+func newLogFile(fp string) {
+	runtime.LockOSThread()
+	for {
+		now := time.Now()
+		dir := filepath.Join(fp, strconv.Itoa(now.Year()), now.Month().String())
+		if logFile != nil {
+			if err := logFile.Close(); err != nil {
+				println(err.Error())
+			}
+		}
+		var err error
+		logFileLock.Lock()
+		logFile, err = ezFile.CreateFile(dir, strconv.Itoa(now.Day())+".log", true, os.O_RDWR|os.O_CREATE|os.O_APPEND)
+		logFileLock.Unlock()
+		if err != nil {
+			println(err.Error())
+			return
+		}
+		next := now.Add(time.Hour * 24)
+		next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
+		t := time.NewTimer(next.Sub(now))
+		<-t.C
 	}
 }
 func sendToDing(msg string) {
@@ -124,26 +198,4 @@ func sendToDing(msg string) {
 		F("rsp from ding:" + rspStr)
 	}
 	_ = rsp.Body.Close()
-}
-func mPrint(level int, msg string) {
-	switch level {
-	case LogLvTrace:
-		fmt.Printf("\n %c[1;30m%s%c[0m", 0x1B, msg, 0x1B)
-		break
-	case LogLvInfo:
-		fmt.Printf("\n %c[1;32m%s%c[0m", 0x1B, msg, 0x1B)
-		break
-	case LogLvWarning:
-		fmt.Printf("\n %c[1;33m%s%c[0m", 0x1B, msg, 0x1B)
-		break
-	case LogLvError:
-		fmt.Printf("\n %c[1;31m%s%c[0m", 0x1B, msg, 0x1B)
-		break
-	case LogLvFatal:
-		fmt.Printf("\n %c[0;34m%s%c[0m", 0x1B, msg, 0x1B)
-		break
-	case LogLvMessageToDing:
-		fmt.Printf("\n %c[1;35m%s%c[0m", 0x1B, msg, 0x1B)
-		break
-	}
 }

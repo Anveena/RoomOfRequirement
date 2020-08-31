@@ -26,6 +26,12 @@ func main() {
 		println(err.Error())
 		return
 	}
+	t := time.Now()
+	for i := 0; i < 100000; i++ {
+		ezLog.TWithTag("测试", "僧推月下门")
+	}
+	//8638000 5444000 5748000
+	println(time.Now().Sub(t).String())
 	ezLog.T(ezRandom.RandomString(ezRandom.OctNumberOnly, 16), ezRandom.OctNumberOnly)
 	ezLog.I(ezRandom.RandomString(ezRandom.HexNumberOnly, 16), ezRandom.HexNumberOnly)
 	ezLog.W(ezRandom.RandomString(ezRandom.LowercaseLetterOnly, 16), ezRandom.LowercaseLetterOnly)
