@@ -27,7 +27,7 @@ func main() {
 		return
 	}
 	t := time.Now()
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 10; i++ {
 		ezLog.TWithTag("测试", "僧推月下门")
 	}
 	//8638000 5444000 5748000

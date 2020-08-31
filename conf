@@ -2,5 +2,6 @@
 
     "log_level":0,
     "log_file_path":".",
-    "ding_ding_url":"https://oapi.dingtalk.com/robot/send?access_token=06d9829e1a5b1f3d9a547c0fceee78a78db39f3d6393b467e26436f6df2ad06d"
+    "ding_ding_url":"https://oapi.dingtalk.com/robot/send?access_token=06d9829e1a5b1f3d9a547c0fceee78a78db39f3d6393b467e26436f6df2ad06d",
+    "debug_mode":true
    }

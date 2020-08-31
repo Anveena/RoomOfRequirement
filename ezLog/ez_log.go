@@ -42,7 +42,7 @@ var lvMap = map[int]string{
 	LogLvMessageToDing: "[Ding]   ",
 }
 var dingURL = ""
-var levelShouldPrintAtTerminal = LogLvInfo
+var logLevel = LogLvInfo
 var logFile *os.File
 var logFileLock = &sync.Mutex{}
 var txtMsgQue = make(chan *string, 1024)
@@ -51,6 +51,7 @@ type EZLoggerModel struct {
 	LogLevel    int    `json:"log_level"`
 	LogFilePath string `json:"log_file_path"`
 	DingDingUrl string `json:"ding_ding_url"`
+	DebugMode   bool   `json:"debug_mode"`
 }
 
 func SetUpEnv(m *EZLoggerModel) error {
@@ -58,12 +59,16 @@ func SetUpEnv(m *EZLoggerModel) error {
 	if m.LogLevel <= LogLvMessageToDing && dingURL == "" {
 		return errors.New("ezlog level include ding talk but ding url is empty")
 	}
-	levelShouldPrintAtTerminal = m.LogLevel
-	if err := ezFile.CreateDir(m.LogFilePath); err != nil {
-		return err
+	logLevel = m.LogLevel
+	if !m.DebugMode {
+		if err := ezFile.CreateDir(m.LogFilePath); err != nil {
+			return err
+		}
+		go newLogFile(m.LogFilePath)
+		go startLogServer()
+	} else {
+		go startDebugLogServer()
 	}
-	go newLogFile(m.LogFilePath)
-	go startLogServer()
 	return nil
 }
 func T(msg ...interface{}) {
@@ -106,13 +111,13 @@ func SendMessageToDingWithTag(tag string, msg ...interface{}) {
 	go sendToDing(msgWithTagFmt(LogLvMessageToDing, fmt.Sprint(msg...), tag))
 }
 func ezlog(level int, msg string) {
-	if level >= levelShouldPrintAtTerminal {
+	if level >= logLevel {
 		rs := msgFmt(level, msg)
 		txtMsgQue <- &rs
 	}
 }
 func ezlogWithTag(level int, msg string, tag string) {
-	if level >= levelShouldPrintAtTerminal {
+	if level >= logLevel {
 		rs := msgWithTagFmt(level, msg, tag)
 		txtMsgQue <- &rs
 	}
@@ -134,6 +139,13 @@ func msgFmt(level int, msg string) string {
 		strHeader + "Line:" + strconv.Itoa(line) +
 		strHeader + "Time:" + time.Now().Format("15:04:05.999999") +
 		strHeader + msgFormatted + "\n"
+}
+func startDebugLogServer() {
+	runtime.LockOSThread()
+	for {
+		msg := <-txtMsgQue
+		println(*msg)
+	}
 }
 func startLogServer() {
 	runtime.LockOSThread()
