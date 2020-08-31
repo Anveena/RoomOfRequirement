@@ -116,13 +116,13 @@ func ezlog(level int, msg string) {
 		txtMsgQue <- &rs
 	}
 }
-func ezlogWithTag(level int, msg string, tag string) {
+func ezlogWithTag(level int, tag string, msg string) {
 	if level >= logLevel {
-		rs := msgWithTagFmt(level, msg, tag)
+		rs := msgWithTagFmt(level, tag, msg)
 		txtMsgQue <- &rs
 	}
 }
-func msgWithTagFmt(level int, msg string, tag string) string {
+func msgWithTagFmt(level int, tag string, msg string) string {
 	_, file, line, _ := runtime.Caller(3)
 	strHeader := "\n" + lvMap[level] + "[" + tag + "] "
 	msgFormatted := strings.ReplaceAll(msg, "\n", strHeader)
