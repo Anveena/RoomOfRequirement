@@ -72,43 +72,43 @@ func SetUpEnv(m *EZLoggerModel) error {
 	return nil
 }
 func T(msg ...interface{}) {
-	ezlog(LogLvTrace, fmt.Sprint(msg...))
+	ezlog(LogLvTrace, fmt.Sprintln(msg...))
 }
 func I(msg ...interface{}) {
-	ezlog(LogLvInfo, fmt.Sprint(msg...))
+	ezlog(LogLvInfo, fmt.Sprintln(msg...))
 }
 func W(msg ...interface{}) {
-	ezlog(LogLvWarning, fmt.Sprint(msg...))
+	ezlog(LogLvWarning, fmt.Sprintln(msg...))
 }
 func E(msg ...interface{}) {
-	ezlog(LogLvError, fmt.Sprint(msg...))
+	ezlog(LogLvError, fmt.Sprintln(msg...))
 }
 func F(msg ...interface{}) {
-	ezlog(LogLvFatal, fmt.Sprint(msg...))
+	ezlog(LogLvFatal, fmt.Sprintln(msg...))
 }
 func SendMessageToDing(msg ...interface{}) {
-	go sendToDing(msgFmt(LogLvMessageToDing, fmt.Sprint(msg...)))
-	ezlog(LogLvMessageToDing, fmt.Sprint(msg...))
+	go sendToDing(msgFmt(LogLvMessageToDing, fmt.Sprintln(msg...)))
+	ezlog(LogLvMessageToDing, fmt.Sprintln(msg...))
 }
 
 func TWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvTrace, tag, fmt.Sprint(msg...))
+	ezlogWithTag(LogLvTrace, tag, fmt.Sprintln(msg...))
 }
 func IWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvInfo, tag, fmt.Sprint(msg...))
+	ezlogWithTag(LogLvInfo, tag, fmt.Sprintln(msg...))
 }
 func WWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvWarning, tag, fmt.Sprint(msg...))
+	ezlogWithTag(LogLvWarning, tag, fmt.Sprintln(msg...))
 }
 func EWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvError, tag, fmt.Sprint(msg...))
+	ezlogWithTag(LogLvError, tag, fmt.Sprintln(msg...))
 }
 func FWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvFatal, tag, fmt.Sprint(msg...))
+	ezlogWithTag(LogLvFatal, tag, fmt.Sprintln(msg...))
 }
 func SendMessageToDingWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvMessageToDing, tag, fmt.Sprint(msg...))
-	go sendToDing(msgWithTagFmt(LogLvMessageToDing, fmt.Sprint(msg...), tag))
+	ezlogWithTag(LogLvMessageToDing, tag, fmt.Sprintln(msg...))
+	go sendToDing(msgWithTagFmt(LogLvMessageToDing, fmt.Sprintln(msg...), tag))
 }
 func ezlog(level int, msg string) {
 	if level >= logLevel {
