@@ -81,6 +81,42 @@ func AESCBCDecrypt(encData *[]byte, key *[]byte) (_ *[]byte, err error) {
 	origData = freedomUnPadding(&origData)
 	return &origData, nil
 }
+func AESEncryptForJava(origData []byte, key []byte) (_ []byte, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("%v", e)
+		}
+	}()
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	blockSize := c.BlockSize()
+	tmpData := freedomPadding(&origData, blockSize)
+
+	result := make([]byte, len(tmpData))
+	for i := 0; i < len(tmpData); i += aes.BlockSize {
+		c.Encrypt(result[i:], tmpData[i:])
+	}
+	return result, nil
+}
+
+func AESDecryptForJava(encData []byte, key []byte) (_ []byte, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("%v", e)
+		}
+	}()
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]byte, len(encData))
+	for i := 0; i < len(encData); i += aes.BlockSize {
+		c.Decrypt(result[i:], encData[i:])
+	}
+	return freedomUnPadding(&result), nil
+}
 func EZEncrypt(origData *[]byte, ezKey string, salt uint64) (_ *[]byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
