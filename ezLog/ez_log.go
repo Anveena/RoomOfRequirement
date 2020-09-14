@@ -108,7 +108,7 @@ func FWithTag(tag string, msg ...interface{}) {
 }
 func SendMessageToDingWithTag(tag string, msg ...interface{}) {
 	ezlogWithTag(LogLvMessageToDing, tag, fmt.Sprintln(msg...))
-	go sendToDing(msgWithTagFmt(LogLvMessageToDing, fmt.Sprintln(msg...), tag))
+	go sendToDing(msgWithTagFmt(LogLvMessageToDing, tag, fmt.Sprintln(msg...)))
 }
 func ezlog(level int, msg string) {
 	if level >= logLevel {
