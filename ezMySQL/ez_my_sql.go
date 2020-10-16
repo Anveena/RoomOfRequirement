@@ -1,9 +1,8 @@
 package ezMySQL
 
 import (
-	"encoding/base64"
 	"errors"
-	"github.com/Anveena/RoomOfRequirement/ezCrypto"
+	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
 	_ "github.com/go-sql-driver/mysql"
 	"sync/atomic"
 	"time"
@@ -23,30 +22,11 @@ var isInit = int32(0)
 var dbQueue = make(chan interface{}, 1000)
 var closeSignal = make(chan bool, 10)
 
-func MakePasswordBase64Str(origPwd string) (string, error) {
-	origPwdData := []byte(origPwd)
-	encData, err := ezCrypto.EZEncrypt(&origPwdData, "this code may be not working", 9458)
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(*encData), nil
-}
-func getPasswordFromBase64Str(base64Str string) (string, error) {
-	encData, err := base64.StdEncoding.DecodeString(base64Str)
-	if err != nil {
-		return "", err
-	}
-	origData, err := ezCrypto.EZDecrypt(&encData, "this code may be not working", 9458)
-	if err != nil {
-		return "", err
-	}
-	return string(*origData), nil
-}
 func InitEnv(dbInfo *Info, dbModels ...interface{}) error {
 	if dbInfo.PasswordBase64Str == "" {
 		return errors.New("empty password base64 str")
 	}
-	password, e := getPasswordFromBase64Str(dbInfo.PasswordBase64Str)
+	password, e := ezPasswordEncoder.GetPasswordFromEncodedStr(dbInfo.PasswordBase64Str)
 	if e != nil {
 		return e
 	}

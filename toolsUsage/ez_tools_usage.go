@@ -7,7 +7,7 @@ import (
 	"github.com/Anveena/RoomOfRequirement/ezFile"
 	"github.com/Anveena/RoomOfRequirement/ezHash"
 	"github.com/Anveena/RoomOfRequirement/ezLog"
-	"github.com/Anveena/RoomOfRequirement/ezMySQL"
+	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
 	"github.com/Anveena/RoomOfRequirement/ezRandom"
 	"github.com/Anveena/RoomOfRequirement/ezXMLTreeMaker"
 	"os"
@@ -38,7 +38,7 @@ func main() {
 	ezLog.E(ezRandom.RandomString(ezRandom.CapitalLetterOnly, 16), ezRandom.CapitalLetterOnly)
 	ezLog.F(ezRandom.RandomString(ezRandom.NumberAndCapitalLetter, 16), ezRandom.NumberAndCapitalLetter)
 	ezLog.SendMessageToDing(ezRandom.RandomString(ezRandom.NumberAndLowercaseLetter, 16), ezRandom.NumberAndLowercaseLetter)
-	ezLog.I(ezMySQL.MakePasswordBase64Str("jyydb_2015!"))
+	ezLog.I(ezPasswordEncoder.EncodePassword("jyydb_2015!"))
 	f, err := ezFile.CreateFile("/Users/panys/Desktop/", "wzz.txt", true, os.O_RDWR|os.O_CREATE|os.O_TRUNC)
 	if err != nil {
 		ezLog.F(err.Error())
