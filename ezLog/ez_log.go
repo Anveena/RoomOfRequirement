@@ -45,7 +45,7 @@ var dingURL = ""
 var logLevel = LogLvInfo
 var logFile *os.File
 var logFileLock = &sync.Mutex{}
-var txtMsgQue = make(chan *string, 1024)
+var debugMode = false
 
 type EZLoggerModel struct {
 	LogLevel    int    `json:"log_level"`
@@ -60,14 +60,12 @@ func SetUpEnv(m *EZLoggerModel) error {
 		return errors.New("ezlog level include ding talk but ding url is empty")
 	}
 	logLevel = m.LogLevel
+	debugMode = m.DebugMode
 	if !m.DebugMode {
 		if err := ezFile.CreateDir(m.LogFilePath); err != nil {
 			return err
 		}
 		go newLogFile(m.LogFilePath)
-		go startLogServer()
-	} else {
-		go startDebugLogServer()
 	}
 	return nil
 }
@@ -113,13 +111,31 @@ func SendMessageToDingWithTag(tag string, msg ...interface{}) {
 func ezlog(level int, msg string) {
 	if level >= logLevel {
 		rs := msgFmt(level, msg)
-		txtMsgQue <- &rs
+		if debugMode {
+			println(rs)
+		} else {
+			logFileLock.Lock()
+			_, _ = logFile.WriteString(rs)
+			if err := logFile.Sync(); err != nil {
+				println(err.Error())
+			}
+			logFileLock.Unlock()
+		}
 	}
 }
 func ezlogWithTag(level int, tag string, msg string) {
 	if level >= logLevel {
 		rs := msgWithTagFmt(level, tag, msg)
-		txtMsgQue <- &rs
+		if debugMode {
+			println(rs)
+		} else {
+			logFileLock.Lock()
+			_, _ = logFile.WriteString(rs)
+			if err := logFile.Sync(); err != nil {
+				println(err.Error())
+			}
+			logFileLock.Unlock()
+		}
 	}
 }
 func msgWithTagFmt(level int, tag string, msg string) string {
@@ -139,29 +155,6 @@ func msgFmt(level int, msg string) string {
 		strHeader + "Line:" + strconv.Itoa(line) +
 		strHeader + "Time:" + time.Now().Format("15:04:05.999999") +
 		strHeader + msgFormatted + "\n"
-}
-func startDebugLogServer() {
-	runtime.LockOSThread()
-	for {
-		msg := <-txtMsgQue
-		println(*msg)
-	}
-}
-func startLogServer() {
-	runtime.LockOSThread()
-	for {
-		for i := 0; i < 100; i++ {
-			msg := <-txtMsgQue
-			logFileLock.Lock()
-			_, _ = logFile.WriteString(*msg)
-			logFileLock.Unlock()
-		}
-		logFileLock.Lock()
-		if err := logFile.Sync(); err != nil {
-			println(err.Error())
-		}
-		logFileLock.Unlock()
-	}
 }
 func newLogFile(fp string) {
 	runtime.LockOSThread()
