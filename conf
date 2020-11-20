@@ -1,7 +1,10 @@
-{
-
-    "log_level":0,
-    "log_file_path":".",
-    "ding_ding_url":"https://oapi.dingtalk.com/robot/send?access_token=06d9829e1a5b1f3d9a547c0fceee78a78db39f3d6393b467e26436f6df2ad06d",
-    "debug_mode":true
-   }
+logLevel = 100
+logFilePath = '.'
+appName = '测试APP'
+debugMode = true
+[dingTalkModel]
+enable = true
+secretKey = 'SEC47206bbe91b5c88ee39fb4ae65384b25c9da8031c987d9845262426d6621d32c'
+url = 'https://oapi.dingtalk.com/robot/send?access_token=1782e6b9cb54f379350696e53c12997f40358b648f4be1acd940e6515800bc06'
+isAtAll = true
+mobiles = [ '15101304005','17739892613' ]

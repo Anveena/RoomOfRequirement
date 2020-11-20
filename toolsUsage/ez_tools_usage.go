@@ -11,6 +11,7 @@ import (
 	"github.com/Anveena/RoomOfRequirement/ezRandom"
 	"github.com/Anveena/RoomOfRequirement/ezXMLTreeMaker"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -28,35 +29,39 @@ func main() {
 	}
 	t := time.Now()
 	for i := 0; i < 10; i++ {
-		ezLog.TWithTag("测试", "僧推月下门")
+		ezLog.DWithTag("测试", "僧推月下门")
 	}
 	//8638000 5444000 5748000
 	println(time.Now().Sub(t).String())
-	ezLog.T(ezRandom.RandomString(ezRandom.OctNumberOnly, 16), ezRandom.OctNumberOnly)
-	ezLog.I(ezRandom.RandomString(ezRandom.HexNumberOnly, 16), ezRandom.HexNumberOnly)
-	ezLog.W(ezRandom.RandomString(ezRandom.LowercaseLetterOnly, 16), ezRandom.LowercaseLetterOnly)
+	ezLog.D(ezRandom.RandomString(ezRandom.OctNumberOnly, 16), ezRandom.OctNumberOnly)
 	ezLog.E(ezRandom.RandomString(ezRandom.CapitalLetterOnly, 16), ezRandom.CapitalLetterOnly)
-	ezLog.F(ezRandom.RandomString(ezRandom.NumberAndCapitalLetter, 16), ezRandom.NumberAndCapitalLetter)
-	ezLog.SendMessageToDing(ezRandom.RandomString(ezRandom.NumberAndLowercaseLetter, 16), ezRandom.NumberAndLowercaseLetter)
+	ezLog.I(ezRandom.RandomString(ezRandom.NumberAndCapitalLetter, 16), ezRandom.NumberAndCapitalLetter)
+	//ezLog.DingMessage("理论上这是不@的\n鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
+	ezLog.DingList("理论上这是@我的\n鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
+	//ezLog.DingAtAll("理论上这是@所有人的\n鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
+	//ezLog.DingMessageWithTag("test tag","理论上这是不@的\n鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
+	ezLog.DingListWithTag("test tag", "理论上这是@我的\n鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
+	//ezLog.DingAtAllWithTag("test tag","理论上这是@所有人的\n鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
+	//ezLog.SendMessageToDing(ezRandom.RandomString(ezRandom.NumberAndLowercaseLetter, 16), ezRandom.NumberAndLowercaseLetter)
 	ezLog.I(ezPasswordEncoder.EncodePassword("jyydb_2015!"))
 	f, err := ezFile.CreateFile("/Users/panys/Desktop/", "wzz.txt", true, os.O_RDWR|os.O_CREATE|os.O_TRUNC)
 	if err != nil {
-		ezLog.F(err.Error())
+		ezLog.E(err.Error())
 		return
 	}
 	_, err = f.Write([]byte("宇智波"))
 	if err != nil {
-		ezLog.F(err.Error())
+		ezLog.E(err.Error())
 		return
 	}
 	f.Truncate(0)
 	_, err = f.Write([]byte("多由也duoyouye"))
 	if err != nil {
-		ezLog.F(err.Error())
+		ezLog.E(err.Error())
 		return
 	}
 	if err = f.Close(); err != nil {
-		ezLog.F(err.Error())
+		ezLog.E(err.Error())
 		return
 	}
 	orikey := "大番薯"
@@ -64,12 +69,12 @@ func main() {
 	data := []byte("鹅鹅鹅\n曲项向天歌\n白毛浮绿水\n红掌拨清波")
 	encData, err := ezCrypto.AESCBCEncrypt(&data, &aesKey)
 	if err != nil {
-		ezLog.F(err.Error())
+		ezLog.E(err.Error())
 		return
 	}
 	oriData, err := ezCrypto.AESCBCDecrypt(encData, &aesKey)
 	if err != nil {
-		ezLog.F(err.Error())
+		ezLog.E(err.Error())
 		return
 	}
 	ezLog.I("aes decrypt result:", string(*oriData))
@@ -92,4 +97,7 @@ func main() {
 	}
 	rs := ezHash.CalculateCRC(&para, []byte{0x00, 0xB0, 0x0D, 0x00, 0x01, 0xC1, 0x00, 0x00, 0x00, 0x01, 0xF0, 0x00})
 	ezLog.I("crc value", fmt.Sprintf("%x\n", rs))
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	wg.Wait()
 }
