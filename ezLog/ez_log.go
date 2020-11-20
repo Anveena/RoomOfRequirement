@@ -102,15 +102,21 @@ func E(msg ...interface{}) {
 }
 func DingMessage(msg ...interface{}) {
 	ezlog(LogLvDingMessage, fmt.Sprintln(msg...))
-	sendToDing(LogLvDingMessage, "no tag", fmt.Sprintln(msg...))
+	if dingOBJ.Enable {
+		sendToDing(LogLvDingMessage, "no tag", fmt.Sprintln(msg...))
+	}
 }
 func DingAtAll(msg ...interface{}) {
 	ezlog(LogLvDingAll, fmt.Sprintln(msg...))
-	sendToDing(LogLvDingAll, "no tag", fmt.Sprintln(msg...))
+	if dingOBJ.Enable {
+		sendToDing(LogLvDingAll, "no tag", fmt.Sprintln(msg...))
+	}
 }
 func DingList(msg ...interface{}) {
 	ezlog(LogLvDingLists, fmt.Sprintln(msg...))
-	sendToDing(LogLvDingLists, "no tag", fmt.Sprintln(msg...))
+	if dingOBJ.Enable {
+		sendToDing(LogLvDingLists, "no tag", fmt.Sprintln(msg...))
+	}
 }
 
 func DWithTag(tag string, msg ...interface{}) {
@@ -124,15 +130,21 @@ func EWithTag(tag string, msg ...interface{}) {
 }
 func DingMessageWithTag(tag string, msg ...interface{}) {
 	ezlogWithTag(LogLvDingMessage, tag, fmt.Sprintln(msg...))
-	sendToDing(LogLvDingMessage, tag, fmt.Sprintln(msg...))
+	if dingOBJ.Enable {
+		sendToDing(LogLvDingMessage, tag, fmt.Sprintln(msg...))
+	}
 }
 func DingAtAllWithTag(tag string, msg ...interface{}) {
 	ezlogWithTag(LogLvDingAll, tag, fmt.Sprintln(msg...))
-	sendToDing(LogLvDingAll, tag, fmt.Sprintln(msg...))
+	if dingOBJ.Enable {
+		sendToDing(LogLvDingAll, tag, fmt.Sprintln(msg...))
+	}
 }
 func DingListWithTag(tag string, msg ...interface{}) {
 	ezlogWithTag(LogLvDingLists, tag, fmt.Sprintln(msg...))
-	sendToDing(LogLvDingLists, tag, fmt.Sprintln(msg...))
+	if dingOBJ.Enable {
+		sendToDing(LogLvDingLists, tag, fmt.Sprintln(msg...))
+	}
 }
 func ezlog(level int, msg string) {
 	if level >= logLevel {
