@@ -91,7 +91,7 @@ func SetUpEnv(m *EZLoggerModel) error {
 		if dingOBJ.SecretKeyEncodedString == "" {
 			return errors.New("empty secret key encoded str")
 		}
-		secretKey, e := ezPasswordEncoder.GetPasswordFromEncodedStr(dingOBJ.URLEncodedString)
+		secretKey, e := ezPasswordEncoder.GetPasswordFromEncodedStr(dingOBJ.SecretKeyEncodedString)
 		if e != nil {
 			return e
 		}
