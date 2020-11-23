@@ -2,9 +2,3 @@ logLevel = 100
 logFilePath = '.'
 appName = '测试APP'
 debugMode = true
-[dingTalkModel]
-enable = true
-secretKey = 'SEC47206bbe91b5c88ee39fb4ae65384b25c9da8031c987d9845262426d6621d32c'
-url = 'https://oapi.dingtalk.com/robot/send?access_token=1782e6b9cb54f379350696e53c12997f40358b648f4be1acd940e6515800bc06'
-isAtAll = true
-mobiles = [ '15101304005','17739892613' ]

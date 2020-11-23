@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Anveena/RoomOfRequirement/ezFile"
+	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -46,10 +47,12 @@ var dingOBJ *dingTalkModel
 var appName = ""
 
 type dingTalkModel struct {
-	Enable    bool
-	Mobiles   []string
-	SecretKey string
-	URL       string
+	Enable                 bool
+	Mobiles                []string
+	SecretKey              string
+	SecretKeyEncodedString string
+	URL                    string
+	URLEncodedString       string
 }
 type EZLoggerModel struct {
 	LogLevel      int
@@ -77,9 +80,22 @@ func SetUpEnv(m *EZLoggerModel) error {
 	}
 	dingOBJ = &m.DingTalkModel
 	if dingOBJ.Enable {
-		if dingOBJ.URL == "" {
-			return errors.New("ding talk is enabled but ding url is empty")
+		if dingOBJ.URLEncodedString == "" {
+			return errors.New("empty url encoded str")
 		}
+		dingUrl, e := ezPasswordEncoder.GetPasswordFromEncodedStr(dingOBJ.URLEncodedString)
+		if e != nil {
+			return e
+		}
+		dingOBJ.URL = dingUrl
+		if dingOBJ.SecretKeyEncodedString == "" {
+			return errors.New("empty secret key encoded str")
+		}
+		secretKey, e := ezPasswordEncoder.GetPasswordFromEncodedStr(dingOBJ.URLEncodedString)
+		if e != nil {
+			return e
+		}
+		dingOBJ.SecretKey = secretKey
 	}
 	logLevel = m.LogLevel
 	debugMode = m.DebugMode
