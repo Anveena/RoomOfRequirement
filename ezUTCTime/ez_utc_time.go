@@ -19,3 +19,6 @@ func SyncTimeFromAliyun() error {
 func GetAliyunTimestamp() uint64 {
 	return uint64(time.Now().Unix()+protobufTime) * 1000
 }
+func GetAliyunTime() time.Time {
+	return time.Now().Add(time.Second * time.Duration(protobufTime))
+}

@@ -5,11 +5,14 @@ import (
 	"github.com/Anveena/RoomOfRequirement/ezLog"
 	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
 	"github.com/Anveena/RoomOfRequirement/ezRandom"
+	"github.com/Anveena/RoomOfRequirement/ezUTCTime"
 	"sync"
 	"time"
 )
 
 func main() {
+	ezUTCTime.SyncTimeFromAliyun()
+	println(ezUTCTime.GetAliyunTime().String())
 	var obj ezLog.EZLoggerModel
 	err := ezConfig.ReadConf(&obj)
 	if err != nil {
