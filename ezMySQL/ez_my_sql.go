@@ -10,11 +10,11 @@ import (
 )
 
 type Info struct {
-	Host              string `json:"host"`
-	Port              string `json:"port"`
-	Account           string `json:"account"`
-	PasswordBase64Str string `json:"password_base_64_str"`
-	Name              string `json:"name"`
+	Host              string
+	Port              string
+	Account           string
+	PasswordBase64Str string
+	Name              string
 }
 
 var eng *xorm.Engine

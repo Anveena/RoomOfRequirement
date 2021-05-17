@@ -1,0 +1,16 @@
+LogLevel = 0
+AppName = '测试APP'
+[ConsoleModel]
+Enable = true
+[TxtFileModel]
+Enable = true
+Path = '.'
+[DingTalkModel]
+Enable = false
+SecretKey = ''
+SecretKeyEncodedString = ''
+URL = ''
+URLEncodedString = ''
+Mobiles = []
+[MySQLModel]
+Enable = false

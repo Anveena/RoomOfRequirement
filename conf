@@ -1,4 +1,0 @@
-logLevel = 100
-logFilePath = '.'
-appName = '测试APP'
-debugMode = true
