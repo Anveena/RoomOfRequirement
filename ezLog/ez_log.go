@@ -62,13 +62,13 @@ type EZLoggerModel struct {
 		Mobiles                []string
 	}
 	MySQLModel struct {
-		Enable            bool
-		Host              string
-		Port              string
-		Account           string
-		PasswordBase64Str string
-		TableName         string
-		DatabaseName      string
+		Enable                        bool
+		HowManyDaysThatLogsShouldSave int
+		Host                          string
+		Port                          string
+		Account                       string
+		PasswordBase64Str             string
+		DatabaseName                  string
 	}
 }
 
@@ -136,6 +136,9 @@ func SetUpEnv(m *EZLoggerModel) error {
 		go newLogFile(ezLoggerModel.TxtFileModel.Path)
 	}
 	if enableMySQL {
+		if ezLoggerModel.MySQLModel.HowManyDaysThatLogsShouldSave < 2 {
+			return errors.New("HowManyDaysThatLogsShouldSave MUST > 1")
+		}
 		if ezLoggerModel.MySQLModel.PasswordBase64Str == "" {
 			return errors.New("empty password base64 str")
 		}
@@ -377,16 +380,31 @@ func sendToDing(logLv int, tag string, msg string) {
 
 func startDB() {
 	var err error
-	timer := time.NewTicker(time.Second * 1)
+	tickerToWrite := time.NewTicker(time.Second * 1)
 	msgArr := make([]*ezLogStorage, 1024)
+	now := time.Now()
+	next := now.Add(time.Hour * 24)
+	next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
+	tickerToNewTable := time.NewTicker(next.Sub(now))
 	for true {
 		i := 0
 	outer:
 		for ; i < 1024; i++ {
 			select {
-			case <-timer.C:
+			case <-tickerToWrite.C:
 				break outer
 			case msgArr[i] = <-dbQueue:
+				break
+			case <-tickerToNewTable.C:
+				//先把特别早的一天的那个删掉
+				toDelDate := time.Now().Add(-time.Hour * 24 * time.Duration(ezLoggerModel.MySQLModel.HowManyDaysThatLogsShouldSave))
+				_, err = dbEngine.Exec(fmt.Sprintf("drop table logs_of_%v_%v_%v", toDelDate.Year(), strings.ToLower(toDelDate.Month().String()), toDelDate.Day()))
+				if err != nil {
+					DingAtAllWithTag("db error", err.Error())
+				}
+				if err = dbEngine.Sync2(&ezLogStorage{}); err != nil {
+					DingAtAllWithTag("db error", err.Error())
+				}
 				break
 			}
 		}

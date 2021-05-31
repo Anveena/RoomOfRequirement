@@ -1,6 +1,10 @@
 package ezLog
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 type ezLogStorage struct {
 	ID       int64     `xorm:"pk 'id' autoincr comment('-')"`
@@ -14,8 +18,6 @@ type ezLogStorage struct {
 }
 
 func (e ezLogStorage) TableName() string {
-	if ezLoggerModel.MySQLModel.TableName == "" {
-		return "logs"
-	}
-	return ezLoggerModel.MySQLModel.TableName
+	t := time.Now()
+	return fmt.Sprintf("logs_of_%v_%v_%v", t.Year(), strings.ToLower(t.Month().String()), t.Day())
 }

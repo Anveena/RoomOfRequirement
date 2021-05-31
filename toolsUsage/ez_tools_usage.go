@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Anveena/RoomOfRequirement/ezConfig"
 	"github.com/Anveena/RoomOfRequirement/ezLog"
 	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
 	"github.com/Anveena/RoomOfRequirement/ezRandom"
 	"github.com/Anveena/RoomOfRequirement/ezUTCTime"
+	"strings"
 	"sync"
 	"time"
 )
@@ -13,6 +15,9 @@ import (
 func main() {
 	ezUTCTime.SyncTimeFromAliyun()
 	println(ezUTCTime.GetAliyunTime().String())
+
+	ta := time.Now()
+	println(fmt.Sprintf("logs_of_%v_%v_%v", ta.Year(), strings.ToLower(ta.Month().String()), ta.Day()))
 	var obj ezLog.EZLoggerModel
 	err := ezConfig.ReadConf(&obj)
 	if err != nil {
