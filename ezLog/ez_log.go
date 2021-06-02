@@ -42,6 +42,7 @@ var lvHeaderMap = map[int]string{
 	LogLvDingAll:     "\n[DAA!]  ",
 }
 var logFmtStr = "%vFile:%v%vLine:%v%vTime:%v%v%v\n"
+var tableName = ""
 
 type EZLoggerModel struct {
 	LogLevel     int
@@ -136,6 +137,8 @@ func SetUpEnv(m *EZLoggerModel) error {
 		go newLogFile(ezLoggerModel.TxtFileModel.Path)
 	}
 	if enableMySQL {
+		t := time.Now()
+		tableName = fmt.Sprintf("logs_of_%v_%v_%v", t.Year(), strings.ToLower(t.Month().String()), t.Day())
 		if ezLoggerModel.MySQLModel.HowManyDaysThatLogsShouldSave < 2 {
 			return errors.New("HowManyDaysThatLogsShouldSave MUST > 1")
 		}
@@ -395,13 +398,17 @@ func startDB() {
 			select {
 			case <-timer.C:
 				tickerToNewTable.Reset(time.Hour * 24)
+				t := time.Now()
+				tableName = fmt.Sprintf("logs_of_%v_%v_%v", t.Year(), strings.ToLower(t.Month().String()), t.Day())
 				if err = dbEngine.Sync2(&ezLogStorage{}); err != nil {
 					DingAtAllWithTag("db error", err.Error())
 				}
 				break
 			case <-tickerToNewTable.C:
 				toDelDate := time.Now().Add(-time.Hour * 24 * time.Duration(ezLoggerModel.MySQLModel.HowManyDaysThatLogsShouldSave))
-				_, _ = dbEngine.Exec(fmt.Sprintf("drop table logs_of_%v_%v_%v", toDelDate.Year(), strings.ToLower(toDelDate.Month().String()), toDelDate.Day()))
+				t := time.Now()
+				tableName = fmt.Sprintf("logs_of_%v_%v_%v", t.Year(), strings.ToLower(t.Month().String()), t.Day())
+				_, _ = dbEngine.Exec(fmt.Sprintf("drop table if exists logs_of_%v_%v_%v", toDelDate.Year(), strings.ToLower(toDelDate.Month().String()), toDelDate.Day()))
 				if err = dbEngine.Sync2(&ezLogStorage{}); err != nil {
 					DingAtAllWithTag("db error", err.Error())
 				}

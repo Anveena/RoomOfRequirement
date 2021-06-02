@@ -1,8 +1,6 @@
 package ezLog
 
 import (
-	"fmt"
-	"strings"
 	"time"
 )
 
@@ -18,6 +16,5 @@ type ezLogStorage struct {
 }
 
 func (e ezLogStorage) TableName() string {
-	t := time.Now()
-	return fmt.Sprintf("logs_of_%v_%v_%v", t.Year(), strings.ToLower(t.Month().String()), t.Day())
+	return tableName
 }
