@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/Anveena/RoomOfRequirement/ezConfig"
-	"github.com/Anveena/RoomOfRequirement/ezLog"
-	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
-	"github.com/Anveena/RoomOfRequirement/ezRandom"
-	"github.com/Anveena/RoomOfRequirement/ezUTCTime"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezConfig"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezLog"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezPasswordEncoder"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezRandom"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezUTCTime"
 	"strings"
 	"sync"
 	"time"

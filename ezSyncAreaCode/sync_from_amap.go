@@ -3,8 +3,8 @@ package ezSyncAreaCode
 import (
 	"encoding/json"
 	"errors"
-	"github.com/Anveena/RoomOfRequirement/ezMySQL"
-	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezMySQL"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezPasswordEncoder"
 	"io/ioutil"
 	"net/http"
 	"sort"

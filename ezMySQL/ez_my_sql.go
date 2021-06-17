@@ -2,7 +2,7 @@ package ezMySQL
 
 import (
 	"errors"
-	"github.com/Anveena/RoomOfRequirement/ezPasswordEncoder"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezPasswordEncoder"
 	_ "github.com/go-sql-driver/mysql"
 	"sync/atomic"
 	"time"

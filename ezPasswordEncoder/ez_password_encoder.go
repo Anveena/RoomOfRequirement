@@ -2,7 +2,7 @@ package ezPasswordEncoder
 
 import (
 	"encoding/base64"
-	"github.com/Anveena/RoomOfRequirement/ezCrypto"
+	"github.com/HogwartsBerkeley/RoomOfRequirement/ezCrypto"
 )
 
 func EncodePassword(origPwd string) (string, error) {

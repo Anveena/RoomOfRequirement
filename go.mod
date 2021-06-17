@@ -1,4 +1,4 @@
-module github.com/Anveena/RoomOfRequirement
+module github.com/HogwartsBerkeley/RoomOfRequirement
 
 go 1.16
 
