@@ -9,17 +9,17 @@ import (
 	"fmt"
 )
 
-func freedomPadding(ciphertext *[]byte, blockSize int) []byte {
-	padding := blockSize - len(*ciphertext)%blockSize
+func freedomPadding(ciphertext []byte, blockSize int) []byte {
+	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(*ciphertext, padtext...)
+	return append(ciphertext, padtext...)
 }
-func freedomUnPadding(plainText *[]byte) []byte {
-	length := len(*plainText)
-	number := int((*plainText)[length-1])
-	return (*plainText)[:length-number]
+func freedomUnPadding(plainText []byte) []byte {
+	length := len(plainText)
+	number := int((plainText)[length-1])
+	return (plainText)[:length-number]
 }
-func TripleDESEncrypt(origData *[]byte, keyStr string) (_ *[]byte, err error) {
+func TripleDESEncrypt(origData []byte, keyStr string) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("%v", e)
@@ -36,7 +36,7 @@ func TripleDESEncrypt(origData *[]byte, keyStr string) (_ *[]byte, err error) {
 	for i := 0; i+blockSize <= len(tmpData); i += blockSize {
 		block.Encrypt(tbc[i:i+blockSize], tmpData[i:i+blockSize])
 	}
-	return &tbc, nil
+	return tbc, nil
 }
 func MakeMD5Key(aesKey string, times int64) []byte {
 	key := []byte(aesKey)
@@ -47,39 +47,39 @@ func MakeMD5Key(aesKey string, times int64) []byte {
 	}
 	return key
 }
-func AESCBCEncrypt(origData *[]byte, key *[]byte) (_ *[]byte, err error) {
+func AESCBCEncrypt(origData []byte, key []byte) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("%v", e)
 		}
 	}()
-	block, err := aes.NewCipher(*key)
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 	blockSize := block.BlockSize()
 	tmpData := freedomPadding(origData, blockSize)
-	blockMode := cipher.NewCBCEncrypter(block, (*key)[:blockSize])
+	blockMode := cipher.NewCBCEncrypter(block, (key)[:blockSize])
 	crypted := make([]byte, len(tmpData))
 	blockMode.CryptBlocks(crypted, tmpData)
-	return &crypted, nil
+	return crypted, nil
 }
-func AESCBCDecrypt(encData *[]byte, key *[]byte) (_ *[]byte, err error) {
+func AESCBCDecrypt(encData []byte, key []byte) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("%v", e)
 		}
 	}()
-	block, err := aes.NewCipher(*key)
+	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 	blockSize := block.BlockSize()
-	blockMode := cipher.NewCBCDecrypter(block, (*key)[:blockSize])
-	origData := make([]byte, len(*encData))
-	blockMode.CryptBlocks(origData, *encData)
-	origData = freedomUnPadding(&origData)
-	return &origData, nil
+	blockMode := cipher.NewCBCDecrypter(block, (key)[:blockSize])
+	origData := make([]byte, len(encData))
+	blockMode.CryptBlocks(origData, encData)
+	origData = freedomUnPadding(origData)
+	return origData, nil
 }
 func AESEncryptForJava(origData []byte, key []byte) (_ []byte, err error) {
 	defer func() {
@@ -92,7 +92,7 @@ func AESEncryptForJava(origData []byte, key []byte) (_ []byte, err error) {
 		return nil, err
 	}
 	blockSize := c.BlockSize()
-	tmpData := freedomPadding(&origData, blockSize)
+	tmpData := freedomPadding(origData, blockSize)
 
 	result := make([]byte, len(tmpData))
 	for i := 0; i < len(tmpData); i += aes.BlockSize {
@@ -115,23 +115,23 @@ func AESDecryptForJava(encData []byte, key []byte) (_ []byte, err error) {
 	for i := 0; i < len(encData); i += aes.BlockSize {
 		c.Decrypt(result[i:], encData[i:])
 	}
-	return freedomUnPadding(&result), nil
+	return freedomUnPadding(result), nil
 }
-func EZEncrypt(origData *[]byte, ezKey string, salt uint64) (_ *[]byte, err error) {
+func EZEncrypt(origData []byte, ezKey string, salt uint64) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("%v", e)
 		}
 	}()
 	aesKey := MakeMD5Key(ezKey, int64(salt%251))
-	return AESCBCEncrypt(origData, &aesKey)
+	return AESCBCEncrypt(origData, aesKey)
 }
-func EZDecrypt(encData *[]byte, ezKey string, salt uint64) (_ *[]byte, err error) {
+func EZDecrypt(encData []byte, ezKey string, salt uint64) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("%v", e)
 		}
 	}()
 	aesKey := MakeMD5Key(ezKey, int64(salt%251))
-	return AESCBCDecrypt(encData, &aesKey)
+	return AESCBCDecrypt(encData, aesKey)
 }
