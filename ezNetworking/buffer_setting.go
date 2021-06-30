@@ -68,7 +68,7 @@ func setUDPBuffer(conn *net.UDPConn, size int, isRead bool, isWrite bool) error 
 	if err != nil {
 		return err
 	}
-	if actuallyValue != size {
+	if actuallyValue < size {
 		return errors.New(fmt.Sprintf("set readbuffer failed,wanted result:%v,actually:%v", size, actuallyValue))
 	}
 	return nil
