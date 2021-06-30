@@ -45,7 +45,7 @@ func setTCPBuffer(conn *net.TCPConn, size int, isRead bool, isWrite bool) error 
 		return err
 	}
 	if actuallyValue < size {
-		return errors.New(fmt.Sprintf("set readbuffer failed,wanted result:%v,actually:%v", size, actuallyValue))
+		return errors.New(fmt.Sprintf("set tcp buffer failed,wanted result:%v,actually:%v", size, actuallyValue))
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func setUDPBuffer(conn *net.UDPConn, size int, isRead bool, isWrite bool) error 
 		return err
 	}
 	if actuallyValue < size {
-		return errors.New(fmt.Sprintf("set readbuffer failed,wanted result:%v,actually:%v", size, actuallyValue))
+		return errors.New(fmt.Sprintf("set tcp buffer failed,wanted result:%v,actually:%v", size, actuallyValue))
 	}
 	return nil
 }
