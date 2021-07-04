@@ -2,74 +2,62 @@ package ezNetworking
 
 import (
 	"errors"
-	"fmt"
 	"net"
-	"syscall"
+	"os"
 )
 
-func SetReadBufferSize(conn net.Conn, size int) error {
+func SetBufferSize(conn net.Conn, size int, isWrite bool) error {
 	if udp, suc := conn.(*net.UDPConn); suc && udp != nil {
-		return setUDPBuffer(udp, size, true, false)
+		if isWrite {
+			if err := udp.SetWriteBuffer(size); err != nil {
+				return err
+			}
+		} else {
+			if err := udp.SetReadBuffer(size); err != nil {
+				return err
+			}
+		}
+		f, err := udp.File()
+		if err != nil {
+			return err
+		}
+		err = checkBufferSize(f, size, isWrite)
+		_ = f.Close()
+		return err
 	}
 	if tcp, suc := conn.(*net.TCPConn); suc && tcp != nil {
-		return setTCPBuffer(tcp, size, true, false)
+		if isWrite {
+			if err := tcp.SetWriteBuffer(size); err != nil {
+				return err
+			}
+		} else {
+			if err := tcp.SetReadBuffer(size); err != nil {
+				return err
+			}
+		}
+		f, err := tcp.File()
+		if err != nil {
+			return err
+		}
+		err = checkBufferSize(f, size, isWrite)
+		_ = f.Close()
+		return err
 	}
 	return errors.New("unknown conn type")
 }
-func SetWriteBufferSize(conn net.Conn, size int) error {
-	if udp, suc := conn.(*net.UDPConn); suc && udp != nil {
-		return setUDPBuffer(udp, size, false, true)
-	}
-	if tcp, suc := conn.(*net.TCPConn); suc && tcp != nil {
-		return setTCPBuffer(tcp, size, false, true)
-	}
-	return errors.New("unknown conn type")
-}
-func setTCPBuffer(conn *net.TCPConn, size int, isRead bool, isWrite bool) error {
-	if isRead {
-		if err := conn.SetReadBuffer(size); err != nil {
-			return err
-		}
-	}
-	if isWrite {
-		if err := conn.SetWriteBuffer(size); err != nil {
-			return err
-		}
-	}
-	f, err := conn.File()
-	if err != nil {
-		return err
-	}
-	actuallyValue, err := syscall.GetsockoptInt(int(f.Fd()), syscall.SOL_SOCKET, syscall.SO_RCVBUF)
-	if err != nil {
-		return err
-	}
-	if actuallyValue < size {
-		return errors.New(fmt.Sprintf("set tcp buffer failed,wanted result:%v,actually:%v", size, actuallyValue))
-	}
-	return nil
-}
-func setUDPBuffer(conn *net.UDPConn, size int, isRead bool, isWrite bool) error {
-	if isRead {
-		if err := conn.SetReadBuffer(size); err != nil {
-			return err
-		}
-	}
-	if isWrite {
-		if err := conn.SetWriteBuffer(size); err != nil {
-			return err
-		}
-	}
-	f, err := conn.File()
-	if err != nil {
-		return err
-	}
-	actuallyValue, err := syscall.GetsockoptInt(int(f.Fd()), syscall.SOL_SOCKET, syscall.SO_RCVBUF)
-	if err != nil {
-		return err
-	}
-	if actuallyValue < size {
-		return errors.New(fmt.Sprintf("set tcp buffer failed,wanted result:%v,actually:%v", size, actuallyValue))
-	}
+func checkBufferSize(f *os.File, size int, isWrite bool) error {
+	//TODO 我并不能做这件事情.因为golang有个BUG,等这个BUG修复了,我就可以放开这里的注释
+	//https://github.com/golang/go/issues/47050
+	//opt := syscall.SO_RCVBUF
+	//if isWrite{
+	//	opt = syscall.SO_SNDBUF
+	//}
+	//actuallyValue, err := syscall.GetsockoptInt(int(f.Fd()), syscall.SOL_SOCKET, opt)
+	//if err != nil {
+	//	return err
+	//}
+	//if actuallyValue < size {
+	//	return errors.New(fmt.Sprintf("set buffer failed,wanted result:%v,actually:%v", size, actuallyValue))
+	//}
 	return nil
 }
