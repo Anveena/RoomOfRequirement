@@ -11,7 +11,7 @@
 |ezHash|一些HASH算法的简单封装|
 |ezLog|一个日志工具,可以写在数据库.文件.std out中|
 |ezMySQL|简单的封装,用于MySQL配置读取,数据插入|
-|ezNetworking|不推荐使用,有待重构|
+|ezNetworking|一些简单的UDP/TCP监听封装|
 |ezPasswordEncoder|一套自有的面对字符串的加解密,用于一些隐私信息在服务器上的配置文件填写|
 |ezRandom|随机字符串什么的|
 |ezStringEncoding|一些字符串编码的转化|

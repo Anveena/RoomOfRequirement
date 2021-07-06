@@ -8,14 +8,38 @@ import (
 	"github.com/HogwartsBerkeley/RoomOfRequirement/ezRandom"
 	"github.com/HogwartsBerkeley/RoomOfRequirement/ezUTCTime"
 	"strings"
-	"sync"
 	"time"
 )
 
 func main() {
+	//udpConn,e:= ezNetworking.ListenUDP4(44444,234,3230)
+	//if e != nil{
+	//	return
+	//}
+	//wg := sync.WaitGroup{}
+	//wg.Add(1)
+	//udpConn.SetReadDeadline(time.Now().Add(3*time.Second))
+	//go func() {
+	//	time.Sleep(1*time.Second)
+	//	udpConn2,e := ezNetworking.ListenUDP4(44434,65536,-1)
+	//	if e != nil{
+	//		return
+	//	}
+	//	data := make([]byte,65500,65500)
+	//	addr,_ := net.ResolveUDPAddr("udp4","127.0.0.1:44444")
+	//	l,er :=  udpConn2.WriteToUDP(data,addr)
+	//	println(l,er)
+	//	//wg.Done()
+	//}()
+	//go func() {
+	//	data := make([]byte,1280000)
+	//	println("s l")
+	//	l,addr,er := udpConn.ReadFromUDP(data)
+	//	println(ezUTCTime.GetAliyunTime().String(),l,addr,er)
+	//}()
+	//
+	//wg.Wait()
 	ezUTCTime.SyncTimeFromAliyun()
-	println(ezUTCTime.GetAliyunTime().String())
-
 	ta := time.Now()
 	println(fmt.Sprintf("logs_of_%v_%v_%v", ta.Year(), strings.ToLower(ta.Month().String()), ta.Day()))
 	var obj ezLog.EZLoggerModel
@@ -101,7 +125,7 @@ func main() {
 	//}
 	//rs := ezHash.CalculateCRC(&para, []byte{0x00, 0xB0, 0x0D, 0x00, 0x01, 0xC1, 0x00, 0x00, 0x00, 0x01, 0xF0, 0x00})
 	//ezLog.I("crc value", fmt.Sprintf("%x\n", rs))
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	wg.Wait()
+	//wg := sync.WaitGroup{}
+	//wg.Add(1)
+	//wg.Wait()
 }
